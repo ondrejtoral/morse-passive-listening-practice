@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CW Morse Trainer - Passive Listening</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', 'Consolas', 'Monaco', monospace;
+            background: #0a0a0a;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #00ff00;
+        }
+
+        .container {
+            background: #1a1a1a;
+            border: 2px solid #00ff00;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #00ff00;
+            margin-bottom: 5px;
+            font-size: 24px;
+            text-align: center;
+            font-weight: normal;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #00aa00;
+            font-size: 12px;
+            margin-bottom: 25px;
+            letter-spacing: 1px;
+        }
+
+        .category-selector {
+            margin-bottom: 20px;
+        }
+
+        .category-selector label {
+            display: block;
+            color: #00ff00;
+            margin-bottom: 8px;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #00ff00;
+            background: #0a0a0a;
+            color: #00ff00;
+            font-family: 'Courier New', 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        select:focus {
+            outline: none;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+        }
+
+        select option {
+            background: #0a0a0a;
+            color: #00ff00;
+        }
+
+        .phrase-display {
+            background: #000000;
+            border: 1px solid #00ff00;
+            padding: 30px;
+            text-align: center;
+            margin: 20px 0;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .phrase-text {
+            font-size: 36px;
+            font-weight: bold;
+            color: #00ff00;
+            letter-spacing: 4px;
+            font-family: 'Courier New', 'Consolas', 'Monaco', monospace;
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+
+        .phrase-text.hidden {
+            color: #004400;
+            font-size: 18px;
+            text-shadow: none;
+        }
+
+        .status {
+            text-align: center;
+            color: #00aa00;
+            font-size: 13px;
+            margin-bottom: 15px;
+            min-height: 20px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #00ff00;
+            background: #0a0a0a;
+            color: #00ff00;
+            font-size: 14px;
+            font-family: 'Courier New', 'Consolas', 'Monaco', monospace;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: #003300;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #005500;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.4);
+        }
+
+        .btn-secondary {
+            background: #0a0a0a;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #220000;
+            border-color: #ff0000;
+            color: #ff0000;
+        }
+
+        button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .settings {
+            background: #000000;
+            border: 1px solid #00ff00;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #003300;
+        }
+
+        .setting-row:last-child {
+            border-bottom: none;
+        }
+
+        .setting-label {
+            font-size: 13px;
+            color: #00ff00;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #003300;
+            transition: 0.3s;
+            border: 1px solid #006600;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background-color: #006600;
+            transition: 0.3s;
+        }
+
+        input:checked + .slider {
+            background-color: #004400;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+            background-color: #00ff00;
+            box-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+        }
+
+        .info-panel {
+            background: #000000;
+            border: 1px solid #00ff00;
+            padding: 12px;
+            margin-top: 20px;
+            font-size: 11px;
+            color: #00aa00;
+        }
+
+        .progress-indicator {
+            text-align: center;
+            font-size: 11px;
+            color: #00aa00;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 20px;
+            }
+
+            .phrase-text {
+                font-size: 28px;
+            }
+
+            button {
+                padding: 12px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CW Morse Trainer</h1>
+        <div class="subtitle">Passive Listening Practice</div>
+
+        <div class="category-selector">
+            <label for="categorySelect">Practice Category</label>
+            <select id="categorySelect">
+                <option value="qCodes">Q-Codes (QTH, QSL, QRM, etc.)</option>
+                <option value="abbreviations">CW Abbreviations (73, CQ, TNX, etc.)</option>
+                <option value="contestPhrases">Contest Phrases (5NN, CQ TEST, etc.)</option>
+                <option value="callsigns">Callsigns (Generated)</option>
+                <option value="equipment">Equipment & Antennas</option>
+                <option value="rstReports">RST Signal Reports</option>
+                
+                <option value="prosigns">Prosigns (AR, SK, BK, etc.)</option>
+            </select>
+        </div>
+
+        <div class="phrase-display">
+            <div class="phrase-text hidden" id="phraseDisplay">Press "Next Phrase" to begin</div>
+        </div>
+
+        <div class="status" id="statusText"></div>
+
+        <div class="controls">
+            <button class="btn-secondary" id="stopBtn" disabled>Stop</button>
+            <button class="btn-primary" id="nextBtn">Play</button>
+        </div>
+
+        <div class="settings">
+            <div class="setting-row">
+                <span class="setting-label">Shuffle Mode</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="shuffleToggle" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="setting-row">
+                <span class="setting-label">Auto-play</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="autoPlayToggle" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <div class="progress-indicator" id="progressIndicator"></div>
+
+        <div class="info-panel">
+            <strong>Playback Sequence:</strong><br>
+            25 WPM → 25 WPM Farns(20) → 20 WPM → 20 WPM Farns(17) → TTS
+        </div>
+
+        <div style="text-align: center; margin-top: 20px; font-size: 10px; color: #00aa00;">
+            Vibecoded with Claude, 2025-12 OK1TRL
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // CONTENT DATABASE - Easy to edit!
+        // ============================================
+
+        const content = {
+            qCodes: [
+                'QTH',  // Location
+                'QSL',  // Acknowledgement / Confirmation card
+                'QRM',  // Man-made interference
+                'QRN',  // Static / Natural noise
+                'QSB',  // Fading signal
+                'QSY',  // Change frequency
+                'QSO',  // Contact / Conversation
+                'QRL',  // Are you busy? / Frequency in use?
+                'QRS',  // Send more slowly
+                'QRZ',  // Who is calling me?
+                'QRP',  // Low power operation
+                'QRQ',  // Send faster
+                'QRT',  // Stop sending
+                'QRU',  // I have nothing for you
+                'QRV',  // I am ready
+                'QRX',  // Wait / Stand by
+                'QSK',  // I can hear you between signals
+                'QSP',  // I will relay to...
+            ],
+
+            abbreviations: [
+                'CQ',   // Calling any station
+                '73',   // Best regards
+                '88',   // Love and kisses
+                'DE',   // From (this is)
+                'K',    // Go ahead / Over
+                'TNX',  // Thanks
+                'TKS',  // Thanks
+                'FB',   // Fine business / Excellent
+                'OM',   // Old man (any male operator)
+                'YL',   // Young lady (female operator)
+                'XYL',  // Wife
+                'PSE',  // Please
+                'HR',   // Here
+                'ES',   // And
+                'CUL',  // See you later
+                'AGN',  // Again
+                'WX',   // Weather
+                'ANT',  // Antenna
+                'RIG',  // Radio equipment
+                'PWR',  // Power
+                'RST',  // Readability-Signal-Tone report
+                'UR',   // Your / You're
+                'VY',   // Very
+                'HW',   // How
+                'CFM',  // Confirm
+                'TU',   // Thank you
+                'GE',   // Good evening
+                'GA',   // Good afternoon / Go ahead
+                'GM',   // Good morning
+                'GN',   // Good night
+                'HI',   // Laughter
+                'NAME', // Name
+                'QTH',  // Location
+                'WUD',  // Would
+                'CUD',  // Could
+                'CUAGN', // See you again
+                'HPE',  // Hope
+                'SIG',  // Signal
+                'RPRT', // Report
+                'TEMP', // Temperature
+            ],
+
+            // Callsigns are generated dynamically (see function below)
+            callsigns: [],
+
+            equipment: [
+                // Antennas
+                'DIPOLE',
+                'YAGI',
+                'VERTICAL',
+                'BEAM',
+                'LOOP',
+                'QUAD',
+                'DELTA',
+                'INVERTED VEE',
+                'GP',       // Ground plane
+                'LONGWIRE',
+                'SLOPER',
+
+                // Equipment
+                'RIG',
+                'XCVR',     // Transceiver
+                'AMP',      // Amplifier
+                'TUNER',
+                'KEY',
+                'PADDLE',
+                'LINEAR',
+                'KEYER',
+                'FILTER',
+
+                // Bands
+                '160M',
+                '80M',
+                '40M',
+                '30M',
+                '20M',
+                '17M',
+                '15M',
+                '12M',
+                '10M',
+                '6M',
+                '2M',
+            ],
+
+            rstReports: [
+                '599',  // Perfect signal
+                '589',  // Excellent, slight QSB
+                '579',  // Very good, some QSB
+                '569',  // Good, noticeable QSB
+                '559',  // Good readable, QSB
+                '549',  // Fair, readable, QSB
+                '539',  // Fair, readable with difficulty
+                '529',  // Poor, barely readable
+                '339',  // Readable, weak
+                '449',  // Readable, very weak
+                '229',  // Very difficult to read
+            ],
+
+            prosigns: [
+                'AR',   // End of message
+                'SK',   // End of contact / Silent Key
+                'KN',   // Specific station only
+                'BK',   // Break / Back to you
+                'CL',   // Closing station
+                'SOS',  // Distress (sent as single unit)
+                'AS',   // Wait / Stand by
+                'CT',   // Start of transmission
+            ],
+
+            contestPhrases: [
+                // Contest CQ calls
+                'CQ TEST',          // Contest CQ
+                'CQ CONTEST',       // Contest CQ variation
+                'TEST',             // Test (contest mode)
+
+                // Signal reports (contest style)
+                '5NN',              // 599 (fast contest exchange)
+                'TU 5NN',           // Thanks, 599
+                '5NN TU',           // 599, thanks
+                '599',              // Full signal report
+                'TU',               // Thanks (quick)
+
+                // Repeat requests
+                'AGN',              // Again
+                'AGN PSE',          // Again please
+                'PSE AGN',          // Please again
+                'NR',               // Number (serial number request)
+                'CALL',             // Callsign request
+                'UR CALL',          // Your callsign
+
+                // Serial numbers (common in contests)
+                '001',              // Serial 001
+                '023',              // Serial 023
+                '100',              // Serial 100
+                '250',              // Serial 250
+                '500',              // Serial 500
+                '999',              // Serial 999
+
+                // Exchange confirmations
+                'R',                // Roger (received)
+                'R TU',             // Roger thanks
+                'QSL TU',           // Confirm thanks
+                'QRZ',              // Who's calling?
+
+                // Common contest exchanges
+                '5NN 001',          // Report + serial
+                '5NN 100',          // Report + serial
+                'TU 5NN 023',       // Thanks + report + serial
+
+                // Grid squares (VHF contests)
+                'FN20',             // Grid square
+                'DM79',             // Grid square
+                'EM12',             // Grid square
+
+                // State/province abbreviations (NA contests)
+                'CA',               // California
+                'NY',               // New York
+                'ON',               // Ontario
+                'BC',               // British Columbia
+
+                // Zone numbers (CQ zones)
+                'ZONE 4',           // Zone 4
+                'ZONE 14',          // Zone 14
+                'ZONE 25',          // Zone 25
+
+                // Common contest phrases
+                'QRZ TEST',         // Who's calling in contest
+                'RUN',              // Running (high rate)
+                'QTC',              // Messages to transmit
+            ],
+
+            // ============================================
+            // CUSTOM CATEGORIES - Uncomment to use!
+            // ============================================
+
+            // Example: Create your own custom word lists like this:
+            /*
+            myCustomPhrases: [
+                'TEST',     // My test phrase
+                'HELLO',    // Greeting
+                'WORLD',    // Another word
+                // Add more here...
+            ],
+
+            emergencyPhrases: [
+                'HELP',
+                'EMERGENCY',
+                'URGENT',
+                // Add emergency terms...
+            ],
+            */
+        };
+
+        // ============================================
+        // CALLSIGN GENERATION
+        // ============================================
+
+        function generateCallsign(region = 'CZ') {
+            const randomLetter = () => String.fromCharCode(65 + Math.floor(Math.random() * 26));
+            const randomLetters = (n) => Array.from({length: n}, randomLetter).join('');
+
+            const formats = {
+                // Czech Republic - OK/OL prefix
+                CZ: () => {
+                    const useOL = Math.random() < 0.2; // 20% OL, 80% OK
+                    const prefix = useOL ? 'OL' : 'OK';
+                    const number = Math.floor(Math.random() * 10);
+                    // Class A: 2-3 letters, Contest: 1 letter
+                    const suffixLength = Math.random() < 0.15 ? 1 : (Math.random() < 0.5 ? 2 : 3);
+                    return prefix + number + randomLetters(suffixLength);
+                },
+
+                // Germany - DL/DJ/DK/DA/DF
+                DE: () => {
+                    const prefixes = ['DL', 'DJ', 'DK', 'DA', 'DF', 'DH', 'DO'];
+                    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+                    const number = Math.floor(Math.random() * 10);
+                    const suffixLength = Math.random() < 0.2 ? 2 : 3;
+                    return prefix + number + randomLetters(suffixLength);
+                },
+
+                // Poland - SP/SN/SO
+                PL: () => {
+                    const prefixes = ['SP', 'SN', 'SO', 'SQ', 'SR'];
+                    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+                    const number = 1 + Math.floor(Math.random() * 9); // 1-9
+                    const suffixLength = Math.random() < 0.3 ? 2 : 3;
+                    return prefix + number + randomLetters(suffixLength);
+                },
+
+                // France - F
+                FR: () => {
+                    const number = Math.floor(Math.random() * 10);
+                    const suffixLength = 2 + Math.floor(Math.random() * 2); // 2-3 letters
+                    return 'F' + number + randomLetters(suffixLength);
+                },
+
+                // Italy - I
+                IT: () => {
+                    const prefixes = ['I', 'IK', 'IW', 'IZ'];
+                    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+                    const number = Math.floor(Math.random() * 10);
+                    const suffixLength = 2 + Math.floor(Math.random() * 2); // 2-3 letters
+                    return prefix + number + randomLetters(suffixLength);
+                },
+
+                // UK - G/M/2E
+                UK: () => {
+                    const prefixes = ['G', 'M', '2E', 'GW', 'GM'];
+                    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+                    const number = Math.floor(Math.random() * 10);
+                    const suffixLength = 2 + Math.floor(Math.random() * 2); // 2-3 letters
+                    return prefix + number + randomLetters(suffixLength);
+                },
+
+                // Austria - OE
+                AT: () => {
+                    const number = 1 + Math.floor(Math.random() * 9); // 1-9
+                    const suffixLength = 2 + Math.floor(Math.random() * 2);
+                    return 'OE' + number + randomLetters(suffixLength);
+                },
+
+                // Slovakia - OM
+                SK: () => {
+                    const number = Math.floor(Math.random() * 10);
+                    const suffixLength = 2 + Math.floor(Math.random() * 2);
+                    return 'OM' + number + randomLetters(suffixLength);
+                },
+
+                // Hungary - HA
+                HU: () => {
+                    const number = Math.floor(Math.random() * 10);
+                    const suffixLength = 2 + Math.floor(Math.random() * 2);
+                    return 'HA' + number + randomLetters(suffixLength);
+                },
+
+                // Spain - EA/EB
+                ES: () => {
+                    const prefixes = ['EA', 'EB', 'EC'];
+                    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+                    const number = 1 + Math.floor(Math.random() * 9);
+                    const suffixLength = 2 + Math.floor(Math.random() * 2);
+                    return prefix + number + randomLetters(suffixLength);
+                },
+
+                // United States - K/W/N/A
+                US: () => {
+                    const prefixes = ['K', 'W', 'N', 'A'];
+                    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+                    const number = Math.floor(Math.random() * 10);
+                    const suffixLength = 1 + Math.floor(Math.random() * 3); // 1-3 letters
+                    return prefix + number + randomLetters(suffixLength);
+                },
+
+                // Canada - VE/VA
+                CA: () => {
+                    const prefixes = ['VE', 'VA'];
+                    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+                    const number = 1 + Math.floor(Math.random() * 9); // 1-9
+                    const suffixLength = 2 + Math.floor(Math.random() * 2); // 2-3 letters
+                    return prefix + number + randomLetters(suffixLength);
+                },
+            };
+
+            // Mixed international distribution (Europe-focused with NA stations)
+            const regions = [
+                'CZ', 'CZ', 'CZ', 'CZ', 'CZ', 'CZ',  // 35% Czech
+                'DE', 'DE', 'DE', 'DE',               // 25% German
+                'US', 'US', 'US',                     // 17% US
+                'PL', 'PL',                           // 12% Polish
+                'UK', 'FR', 'IT', 'AT', 'SK', 'HU', 'ES', 'CA'  // 11% Mix of other
+            ];
+            const selectedRegion = regions[Math.floor(Math.random() * regions.length)];
+            return formats[selectedRegion]();
+        }
+
+        // Generate 70 international callsigns for the pool
+        for (let i = 0; i < 70; i++) {
+            content.callsigns.push(generateCallsign());
+        }
+
+        // ============================================
+        // MORSE CODE & AUDIO ENGINE
+        // ============================================
+
+        const morseCode = {
+            'A': '.-',    'B': '-...',  'C': '-.-.',  'D': '-..',
+            'E': '.',     'F': '..-.',  'G': '--.',   'H': '....',
+            'I': '..',    'J': '.---',  'K': '-.-',   'L': '.-..',
+            'M': '--',    'N': '-.',    'O': '---',   'P': '.--.',
+            'Q': '--.-',  'R': '.-.',   'S': '...',   'T': '-',
+            'U': '..-',   'V': '...-',  'W': '.--',   'X': '-..-',
+            'Y': '-.--',  'Z': '--..',  '0': '-----', '1': '.----',
+            '2': '..---', '3': '...--', '4': '....-', '5': '.....',
+            '6': '-....', '7': '--...', '8': '---..', '9': '----.',
+            ' ': ' '
+        };
+
+        let audioContext = null;
+        const frequency = 600; // Hz
+
+        function initAudioContext() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        // Calculate timing based on WPM (PARIS standard)
+        function getTimings(wpm, farnsworthWpm = null) {
+            const dotDuration = 60000 / (wpm * 50); // ms
+
+            if (farnsworthWpm && farnsworthWpm < wpm) {
+                // Farnsworth timing: character speed at wpm, effective speed at farnsworthWpm
+                const charGap = dotDuration * ((wpm / farnsworthWpm * 3) - 3 + 3);
+                const wordGap = dotDuration * ((wpm / farnsworthWpm * 7) - 7 + 7);
+
+                return {
+                    dot: dotDuration,
+                    dash: dotDuration * 3,
+                    intraCharGap: dotDuration,
+                    charGap: charGap,
+                    wordGap: wordGap
+                };
+            } else {
+                // Standard timing
+                return {
+                    dot: dotDuration,
+                    dash: dotDuration * 3,
+                    intraCharGap: dotDuration,
+                    charGap: dotDuration * 3,
+                    wordGap: dotDuration * 7
+                };
+            }
+        }
+
+        function playTone(duration) {
+            return new Promise((resolve) => {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                oscillator.frequency.value = frequency;
+                oscillator.type = 'sine';
+
+                const now = audioContext.currentTime;
+
+                // Envelope shaping to avoid clicks
+                gainNode.gain.setValueAtTime(0, now);
+                gainNode.gain.linearRampToValueAtTime(0.3, now + 0.005); // 5ms attack
+                gainNode.gain.setValueAtTime(0.3, now + (duration / 1000) - 0.005);
+                gainNode.gain.linearRampToValueAtTime(0, now + (duration / 1000)); // 5ms release
+
+                oscillator.start(now);
+                oscillator.stop(now + duration / 1000);
+
+                setTimeout(resolve, duration);
+            });
+        }
+
+        function wait(duration) {
+            return new Promise(resolve => setTimeout(resolve, duration));
+        }
+
+        async function playCharacter(char, timings) {
+            const code = morseCode[char.toUpperCase()];
+            if (!code) return;
+
+            if (code === ' ') {
+                await wait(timings.wordGap);
+                return;
+            }
+
+            for (let i = 0; i < code.length; i++) {
+                const symbol = code[i];
+                if (symbol === '.') {
+                    await playTone(timings.dot);
+                } else if (symbol === '-') {
+                    await playTone(timings.dash);
+                }
+
+                if (i < code.length - 1) {
+                    await wait(timings.intraCharGap);
+                }
+            }
+            await wait(timings.charGap);
+        }
+
+        async function playMorseString(text, wpm, farnsworthWpm = null) {
+            const timings = getTimings(wpm, farnsworthWpm);
+            for (const char of text) {
+                if (playbackState.stopped) break;
+                await playCharacter(char, timings);
+            }
+        }
+
+        function speak(text) {
+            return new Promise((resolve, reject) => {
+                if (!('speechSynthesis' in window)) {
+                    reject('Speech synthesis not supported');
+                    return;
+                }
+
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 0.8;
+                utterance.pitch = 1;
+                utterance.volume = 1;
+
+                utterance.onend = resolve;
+                utterance.onerror = reject;
+
+                speechSynthesis.speak(utterance);
+            });
+        }
+
+        // ============================================
+        // APP STATE & LOGIC
+        // ============================================
+
+        let playbackState = {
+            stopped: false,
+            currentCategory: 'qCodes',
+            currentIndex: 0,
+            shuffledIndices: [],
+        };
+
+        // Load settings from localStorage
+        function loadSettings() {
+            const shuffleEnabled = localStorage.getItem('shuffleEnabled');
+            if (shuffleEnabled !== null) {
+                document.getElementById('shuffleToggle').checked = shuffleEnabled === 'true';
+            }
+
+            const autoPlayEnabled = localStorage.getItem('autoPlayEnabled');
+            if (autoPlayEnabled !== null) {
+                document.getElementById('autoPlayToggle').checked = autoPlayEnabled === 'true';
+            }
+        }
+
+        // Save settings to localStorage
+        function saveSettings() {
+            localStorage.setItem('shuffleEnabled', document.getElementById('shuffleToggle').checked);
+            localStorage.setItem('autoPlayEnabled', document.getElementById('autoPlayToggle').checked);
+        }
+
+        // Shuffle array indices
+        function shuffleArray(length) {
+            const indices = Array.from({length}, (_, i) => i);
+            for (let i = indices.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [indices[i], indices[j]] = [indices[j], indices[i]];
+            }
+            return indices;
+        }
+
+        // Get next phrase from current category
+        function getNextPhrase() {
+            const category = content[playbackState.currentCategory];
+            if (!category || category.length === 0) return null;
+
+            const shuffleEnabled = document.getElementById('shuffleToggle').checked;
+
+            if (shuffleEnabled) {
+                // Randomized deck approach
+                if (playbackState.shuffledIndices.length === 0) {
+                    playbackState.shuffledIndices = shuffleArray(category.length);
+                    playbackState.currentIndex = 0;
+                }
+
+                const phrase = category[playbackState.shuffledIndices[playbackState.currentIndex]];
+                playbackState.currentIndex++;
+
+                if (playbackState.currentIndex >= playbackState.shuffledIndices.length) {
+                    playbackState.shuffledIndices = [];
+                }
+
+                return phrase;
+            } else {
+                // Sequential mode
+                const phrase = category[playbackState.currentIndex];
+                playbackState.currentIndex = (playbackState.currentIndex + 1) % category.length;
+                return phrase;
+            }
+        }
+
+        // Update progress indicator
+        function updateProgress() {
+            const category = content[playbackState.currentCategory];
+            const total = category ? category.length : 0;
+            const progressEl = document.getElementById('progressIndicator');
+
+            if (document.getElementById('shuffleToggle').checked) {
+                const remaining = playbackState.shuffledIndices.length - playbackState.currentIndex;
+                progressEl.textContent = `${remaining} phrases remaining in deck`;
+            } else {
+                progressEl.textContent = `Phrase ${playbackState.currentIndex + 1} of ${total}`;
+            }
+        }
+
+        // Main playback sequence
+        async function playPhrase() {
+            initAudioContext();
+
+            const phrase = getNextPhrase();
+            if (!phrase) {
+                document.getElementById('statusText').textContent = 'No phrases in this category';
+                return;
+            }
+
+            playbackState.stopped = false;
+
+            const phraseDisplay = document.getElementById('phraseDisplay');
+            const statusText = document.getElementById('statusText');
+            const nextBtn = document.getElementById('nextBtn');
+            const stopBtn = document.getElementById('stopBtn');
+
+            // Hide phrase initially
+            phraseDisplay.textContent = '• • • • •';
+            phraseDisplay.className = 'phrase-text hidden';
+
+            nextBtn.disabled = true;
+            stopBtn.disabled = false;
+
+            try {
+                // Sequence: 25 WPM → 25 Farns(20) → 20 WPM → 20 Farns(17) → TTS
+
+                statusText.textContent = 'Playing at 25 WPM...';
+                await playMorseString(phrase, 25);
+                if (playbackState.stopped) throw new Error('Stopped');
+
+                await wait(800);
+
+                statusText.textContent = 'Playing at 25 WPM Farnsworth (20 WPM effective)...';
+                await playMorseString(phrase, 25, 20);
+                if (playbackState.stopped) throw new Error('Stopped');
+
+                await wait(800);
+
+                statusText.textContent = 'Playing at 20 WPM...';
+                await playMorseString(phrase, 20);
+                if (playbackState.stopped) throw new Error('Stopped');
+
+                await wait(800);
+
+                statusText.textContent = 'Playing at 20 WPM Farnsworth (17 WPM effective)...';
+                await playMorseString(phrase, 20, 17);
+                if (playbackState.stopped) throw new Error('Stopped');
+
+                await wait(1000);
+
+                // Reveal phrase and speak
+                phraseDisplay.textContent = phrase;
+                phraseDisplay.className = 'phrase-text';
+                statusText.textContent = 'Speaking...';
+
+                await speak(phrase);
+
+                statusText.textContent = 'Complete!';
+
+                updateProgress();
+
+                // Auto-play countdown if enabled
+                if (document.getElementById('autoPlayToggle').checked && !playbackState.stopped) {
+                    statusText.textContent = 'Next phrase in 3 seconds...';
+                    stopBtn.disabled = false;  // Keep stop button enabled during countdown
+                    nextBtn.disabled = true;
+
+                    await wait(3000);
+                    // After wait, check again if still in auto-play mode and not stopped
+                }
+
+            } catch (error) {
+                if (error.message !== 'Stopped') {
+                    console.error('Error:', error);
+                    statusText.textContent = 'Error occurred';
+                } else {
+                    statusText.textContent = 'Stopped';
+                }
+            } finally {
+                // Only reset buttons if NOT continuing with auto-play
+                const willAutoPlay = document.getElementById('autoPlayToggle').checked && !playbackState.stopped;
+                if (!willAutoPlay) {
+                    nextBtn.disabled = false;
+                    stopBtn.disabled = true;
+                }
+            }
+
+            // After finally block: check if we should auto-play next phrase
+            if (document.getElementById('autoPlayToggle').checked && !playbackState.stopped) {
+                playPhrase();
+            }
+        }
+
+        // ============================================
+        // EVENT HANDLERS
+        // ============================================
+
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            playPhrase();
+        });
+
+        document.getElementById('stopBtn').addEventListener('click', () => {
+            playbackState.stopped = true;
+            speechSynthesis.cancel();
+            document.getElementById('statusText').textContent = 'Stopped';
+            document.getElementById('nextBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
+        });
+
+        document.getElementById('categorySelect').addEventListener('change', (e) => {
+            playbackState.currentCategory = e.target.value;
+            playbackState.currentIndex = 0;
+            playbackState.shuffledIndices = [];
+            updateProgress();
+        });
+
+        document.getElementById('shuffleToggle').addEventListener('change', () => {
+            saveSettings();
+            playbackState.currentIndex = 0;
+            playbackState.shuffledIndices = [];
+            updateProgress();
+        });
+
+        document.getElementById('autoPlayToggle').addEventListener('change', () => {
+            saveSettings();
+        });
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+
+        // Sync category selector with default state
+        document.getElementById('categorySelect').value = playbackState.currentCategory;
+
+        loadSettings();
+        updateProgress();
+    </script>
+</body>
+</html>
