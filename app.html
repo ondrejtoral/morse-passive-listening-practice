@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CW Morse Trainer - Passive Listening</title>
     <style>
+        :root {
+            --terminal-bg: #000000;
+            --terminal-bg-alt: #0a0a0a;
+            --terminal-text: #e0e0e0;
+            --terminal-text-bright: #ffffff;
+            --terminal-amber: #FFBF00;
+            --terminal-amber-bright: #FF9500;
+            --terminal-border: #333333;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -12,39 +22,64 @@
         }
 
         body {
-            font-family: 'Courier New', 'Consolas', 'Monaco', monospace;
-            background: #0a0a0a;
+            font-family: 'Consolas', 'Courier New', 'Monaco', 'Lucida Console', monospace;
+            background: var(--terminal-bg);
             min-height: 100vh;
             padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            color: #00ff00;
+            color: var(--terminal-text);
+            text-shadow: 0 0 1px rgba(224, 224, 224, 0.3);
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            z-index: 9999;
         }
 
         .container {
-            background: #1a1a1a;
-            border: 2px solid #00ff00;
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+            background: var(--terminal-bg);
+            border: 1px solid var(--terminal-border);
+            box-shadow: 0 0 20px rgba(255, 191, 0, 0.1);
             padding: 30px;
             max-width: 600px;
             width: 100%;
         }
 
         h1 {
-            color: #00ff00;
+            color: var(--terminal-text-bright);
             margin-bottom: 5px;
             font-size: 24px;
             text-align: center;
-            font-weight: normal;
+            font-weight: 700;
             letter-spacing: 2px;
             text-transform: uppercase;
+            text-shadow: 0 0 10px rgba(255, 191, 0, 0.3);
+        }
+
+        h1::before {
+            content: '> ';
+            color: var(--terminal-amber);
         }
 
         .subtitle {
             text-align: center;
-            color: #00aa00;
+            color: var(--terminal-text);
             font-size: 12px;
             margin-bottom: 25px;
             letter-spacing: 1px;
@@ -56,7 +91,7 @@
 
         .category-selector label {
             display: block;
-            color: #00ff00;
+            color: var(--terminal-amber);
             margin-bottom: 8px;
             font-size: 13px;
             text-transform: uppercase;
@@ -66,27 +101,28 @@
         select {
             width: 100%;
             padding: 10px;
-            border: 1px solid #00ff00;
-            background: #0a0a0a;
-            color: #00ff00;
-            font-family: 'Courier New', 'Consolas', 'Monaco', monospace;
+            border: 1px solid var(--terminal-border);
+            background: var(--terminal-bg-alt);
+            color: var(--terminal-text);
+            font-family: 'Consolas', 'Courier New', 'Monaco', 'Lucida Console', monospace;
             font-size: 14px;
             cursor: pointer;
         }
 
         select:focus {
             outline: none;
-            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+            border-color: var(--terminal-amber);
+            box-shadow: 0 0 10px rgba(255, 191, 0, 0.2);
         }
 
         select option {
-            background: #0a0a0a;
-            color: #00ff00;
+            background: var(--terminal-bg-alt);
+            color: var(--terminal-text);
         }
 
         .phrase-display {
-            background: #000000;
-            border: 1px solid #00ff00;
+            background: var(--terminal-bg);
+            border: 1px solid var(--terminal-border);
             padding: 30px;
             text-align: center;
             margin: 20px 0;
@@ -99,21 +135,21 @@
         .phrase-text {
             font-size: 36px;
             font-weight: bold;
-            color: #00ff00;
+            color: var(--terminal-amber);
             letter-spacing: 4px;
-            font-family: 'Courier New', 'Consolas', 'Monaco', monospace;
-            text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+            font-family: 'Consolas', 'Courier New', 'Monaco', 'Lucida Console', monospace;
+            text-shadow: 0 0 10px rgba(255, 191, 0, 0.5);
         }
 
         .phrase-text.hidden {
-            color: #004400;
+            color: var(--terminal-border);
             font-size: 18px;
             text-shadow: none;
         }
 
         .status {
             text-align: center;
-            color: #00aa00;
+            color: var(--terminal-text);
             font-size: 13px;
             margin-bottom: 15px;
             min-height: 20px;
@@ -128,34 +164,36 @@
         button {
             flex: 1;
             padding: 12px;
-            border: 1px solid #00ff00;
-            background: #0a0a0a;
-            color: #00ff00;
+            border: 1px solid var(--terminal-border);
+            background: var(--terminal-bg-alt);
+            color: var(--terminal-text);
             font-size: 14px;
-            font-family: 'Courier New', 'Consolas', 'Monaco', monospace;
+            font-family: 'Consolas', 'Courier New', 'Monaco', 'Lucida Console', monospace;
             cursor: pointer;
-            transition: all 0.2s;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
 
         .btn-primary {
-            background: #003300;
+            background: var(--terminal-amber);
+            border-color: var(--terminal-amber);
+            color: var(--terminal-bg);
         }
 
-        .btn-primary:hover:not(:disabled) {
-            background: #005500;
-            box-shadow: 0 0 15px rgba(0, 255, 0, 0.4);
+        .btn-primary:hover:not(:disabled),
+        .btn-primary:focus:not(:disabled) {
+            background: var(--terminal-amber-bright);
         }
 
         .btn-secondary {
-            background: #0a0a0a;
+            background: var(--terminal-bg-alt);
         }
 
-        .btn-secondary:hover:not(:disabled) {
-            background: #220000;
-            border-color: #ff0000;
-            color: #ff0000;
+        .btn-secondary:hover:not(:disabled),
+        .btn-secondary:focus:not(:disabled) {
+            background: var(--terminal-amber);
+            border-color: var(--terminal-amber);
+            color: var(--terminal-bg);
         }
 
         button:disabled {
@@ -164,8 +202,8 @@
         }
 
         .settings {
-            background: #000000;
-            border: 1px solid #00ff00;
+            background: var(--terminal-bg);
+            border: 1px solid var(--terminal-border);
             padding: 15px;
             margin-top: 20px;
         }
@@ -175,7 +213,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 10px 0;
-            border-bottom: 1px solid #003300;
+            border-bottom: 1px dashed var(--terminal-border);
         }
 
         .setting-row:last-child {
@@ -184,7 +222,7 @@
 
         .setting-label {
             font-size: 13px;
-            color: #00ff00;
+            color: var(--terminal-text);
             text-transform: uppercase;
             letter-spacing: 1px;
         }
@@ -208,9 +246,8 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: #003300;
-            transition: 0.3s;
-            border: 1px solid #006600;
+            background-color: var(--terminal-bg-alt);
+            border: 1px solid var(--terminal-border);
         }
 
         .slider:before {
@@ -220,33 +257,37 @@
             width: 16px;
             left: 3px;
             bottom: 3px;
-            background-color: #006600;
-            transition: 0.3s;
+            background-color: var(--terminal-border);
         }
 
         input:checked + .slider {
-            background-color: #004400;
+            background-color: var(--terminal-bg-alt);
+            border-color: var(--terminal-amber);
         }
 
         input:checked + .slider:before {
             transform: translateX(26px);
-            background-color: #00ff00;
-            box-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+            background-color: var(--terminal-amber);
+            box-shadow: 0 0 5px rgba(255, 191, 0, 0.5);
         }
 
         .info-panel {
-            background: #000000;
-            border: 1px solid #00ff00;
+            background: var(--terminal-bg);
+            border: 1px solid var(--terminal-border);
             padding: 12px;
             margin-top: 20px;
             font-size: 11px;
-            color: #00aa00;
+            color: var(--terminal-text);
+        }
+
+        .info-panel strong {
+            color: var(--terminal-amber);
         }
 
         .progress-indicator {
             text-align: center;
             font-size: 11px;
-            color: #00aa00;
+            color: var(--terminal-text);
             margin-top: 10px;
         }
 
@@ -256,16 +297,23 @@
             }
 
             h1 {
-                font-size: 20px;
+                font-size: 18px;
             }
 
             .phrase-text {
-                font-size: 28px;
+                font-size: 24px;
             }
 
             button {
                 padding: 12px;
-                font-size: 14px;
+                font-size: 13px;
+            }
+        }
+
+        @media (prefers-contrast: high) {
+            :root {
+                --terminal-text: #ffffff;
+                --terminal-border: #666666;
             }
         }
     </style>
@@ -324,7 +372,7 @@
             25 WPM → 25 WPM Farns(20) → 20 WPM → 20 WPM Farns(17) → TTS
         </div>
 
-        <div style="text-align: center; margin-top: 20px; font-size: 10px; color: #00aa00;">
+        <div style="text-align: center; margin-top: 20px; font-size: 10px; color: var(--terminal-text);">
             Vibecoded with Claude, 2025-12 OK1TRL
         </div>
     </div>
